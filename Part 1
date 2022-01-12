@@ -1,0 +1,120 @@
+library(tidyverse)
+library(dslabs)
+
+data("death_prob")
+
+head(death_prob)
+# age, sex, prob
+
+# an insurance company offers a one year time insurance policy that pays
+# $150,000 in the event of death within one year
+# the premium (annual cost) for this policy for a 50 yr old female is
+# $1,150 
+# suppose that in the event of a claim, the company profits the premium and
+# loses a total of $150,000 and if there's no claim the company gains the
+# premium amount of $1,150 
+# the company plans to sell 1000 policies to this demographic
+
+
+
+## Q1
+# the death_prob dataframe from the dslabs package contains info about
+# the estimated prob of death within one year (porb) for diff ages and sexes
+# use death_prob to determine the death prob of a 50 yr of female, p
+death_prob$prob[death_prob$sex == "Female" & death_prob$age == "50"]
+#: 0.003193
+# another way:
+p_f <- death_prob %>%
+  filter(age == 50 & sex == "Female") %>%
+  pull(prob)
+p_f
+
+
+
+## Q2
+# The lost in the event of the policy holder's death is -$150,000
+# and the gain if the policy holder remains alive is the premium $1,150
+# what's the expected value (mu) of the companies net profit on 1 policy for a 50
+# yr old female?
+a <- -150000
+b <- 1150
+ev_f <- a*p_f + b*(1-p_f)
+ev_f
+#: 667.3781
+
+
+
+## Q3
+# calc the standard error (sigma) on 1 policy for a 50 yr female
+se_f <- abs(a-b) * sqrt(p_f*(1-p_f))
+se_f
+#: 8527.332
+
+
+
+## Q4
+# What's the expect value of the companies profit over 1000 policies for 50 yr
+# old females?
+mu_f <- n * (a*p_f + b*(1-p_f))
+mu_f
+#: 667378.1
+
+
+
+## Q5
+# What's the standard error of the sum of the expected value over all 1000
+# policies for 50 yr old female?
+n <- 1000
+sigma_f <- sqrt(n) * abs(a-b) * sqrt(p_f*(1-p_f))
+sigma_f
+#: 269657.9
+
+
+
+## Q6
+# Use the Central Limit Theorem to calc the prob that the insurance company
+# loses money on this set of 1000 policies
+pnorm(0, mu_f, sigma_f)
+#: 0.006663556
+
+
+
+## Q7
+# use death_prob to determine the prob of death within one year for a 50 yr old
+# male
+p_m <- death_prob %>%
+  filter(age == 50 & sex == "Male") %>%
+  pull(prob)
+p_m
+#: 0.005013
+
+
+
+## Q8
+# Suppose the company wants its expected profits from 1000 50 yr old males
+# with $150,000 life insurance policies to be $700,000 what premium should
+# charge
+n <- 1000
+a <- -150000
+mu_m <- 700000
+b <- ((mu/n) - a*p_m)/(1-p_m)
+b
+#: 1459.265
+
+
+
+## Q9
+# Using the new 50 yr old male premium rate, calc the std error of the sum of
+# 1000 premiums
+se_m <- sqrt(n) * abs(b - a) * sqrt(p_m * (1-p_m))
+se_m
+#: 338262.1
+
+
+
+## Q10
+# What's the prob of losing money on a series of 1000 policies to 50 yr old
+# males
+# (Use CLT)
+pnorm(0, mu_m, se_m)
+#: 0.01925424
